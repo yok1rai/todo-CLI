@@ -1,13 +1,16 @@
 {
   "name": "todocli",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "version": "1.5.0",
+  "description": "A simple CLI todo app",
+  "main": "app.js",
+  "bin": {
+    "todocli": "./app.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module"
+  "scripts": {
+    "postinstall": "node install-completions.js"
+  },
+  "type": "module",
+  "dependencies": {
+    "yargs": "^18.0.0"
+  }
 }

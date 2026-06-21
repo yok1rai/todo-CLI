@@ -1,110 +1,93 @@
+#!/usr/bin/env node
+
 import todo from "./list.js";
+import { hideBin } from 'yargs/helpers';
+import yargs from "yargs";
 
 async function main() {
     const debugMode = process.env.DEBUG === "1" ? true : false;
 
     try {
-        const command = process.argv[2] || "invalid";
-
-        switch (command.trim().toLowerCase()) {
-
-            case 'help': {
-                console.log(`
-    TODO CLI
-
-    USAGE:
-        node app.js <command> [args]
-
-    ENVIRONMENT VARIABLES
-        DEBUG              Enable DEBUG mode
-           1                    DEBUG mode enabled
-           anything else        DEBUG mode disabled
-    COMMAND:
-        add <task>          Add a new todo
-        list                Show all todos
-        done <id|name>      Mark todos as done
-        delete <id|name>    Delete a todo
-        clear               Delete all todos
-        help                show this help menu
-    `);
-                break;
-            }
-
-            case 'add': {
-                const item = process.argv[3];
-
-                if (!item) {
-                    throw new Error("You must specify the task name");
+        await yargs(hideBin(process.argv))
+            .command(
+                'add <task>',
+                "add a new todo",
+                {},
+                (argv) => {
+                    todo.add(argv.task);
                 }
-
-                todo.add(item);
-                break;
-            }
-
-            case 'done': {
-                const name = process.argv[3];
-                if (!name) {
-                    throw new Error("you must specify an ID or task name");
+            )
+            .command(
+                'list',
+                'show all todos',
+                {},
+                () => {
+                    todo.list()
                 }
-                let id;
-                if (Number.isFinite(Number(name))) {
-                    id = Number(name);
-
-                    if (id < 0) {
-                        console.error("ID must be bigger than zero");
-                        break;
+            )
+            .command(
+                'done <id>',
+                'mark todo as done',
+                {},
+                (argv) => {
+                    const name = argv.id;
+                    let id;
+                    if (Number.isFinite(Number(name))) {
+                        id = Number(name);
+                        if (id < 0) {
+                            throw new Error("ID must be bigger than zero");
+                        }
+                    } else {
+                        id = todo.find(name);
                     }
-                } else {
-                    id = todo.find(name);
+                    todo.done(id);
                 }
-
-                todo.done(id);
-                break;
-            }
-
-            case 'delete': {
-                const name = process.argv[3];
-                if (!name) {
-                    throw new Error("you must specify an ID or task name");
-                }
-                let id;
-
-                if (Number.isFinite(Number(name))) {
-                    id = Number(name);
-
-                    if (id < 0) {
-                        console.error("ID must be bigger than zero");
-                        break;
+            )
+            .command(
+                'delete <id>',
+                'delete a todo',
+                {},
+                (argv) => {
+                    const name = argv.id;
+                    let id;
+                    if (Number.isFinite(Number(name))) {
+                        id = Number(name);
+                        if (id < 0) {
+                            throw new Error("ID must be bigger than zero");
+                        }
+                    } else {
+                        id = todo.find(name);
                     }
-                } else {
-                    id = todo.find(name);
+                    todo.delete(id);
                 }
-
-                todo.delete(id);
-                break;
-            }
-
-            case 'clear': {
-                todo.clear();
-                break;
-            }
-
-            case 'list': {
-                todo.list();
-                break;
-            }
-
-            default: {
-                throw new Error("Invalid command");
-            }
-        }
+            )
+            .command(
+                'clear',
+                'delete all todos',
+                {},
+                () => {
+                    todo.clear()
+                }
+            )
+            .completion('completion', 'Generate completion script', () => {
+                return ['add', 'list', 'done', 'delete', 'clear', 'help']
+            })
+            .demandCommand(1, "You must specify a command")
+            .strict()
+            .help()
+            .alias('h', 'help')
+            .version()
+            .alias('v', 'version')
+            .parseAsync();
 
     } catch (e) {
         if (debugMode) {
-            console.log("detailed error:\n", e);
+            console.log("error [DETAILED]:");
+            console.log(e);
         } else {
             console.log("error:", e.message);
         }
+        process.exit(1);
     }
 }
 
