@@ -150,6 +150,39 @@ class Todolist {
             console.log(`${task} [${id}] [${status}] [${time}]`);
         });
     }
+    debugList() {
+        const todos = this.#todos;
+        if (todos.length === 0) {
+            console.error("no todos yet!");
+            return;
+        }
+
+        console.log("Your Todos:");
+
+        todos.forEach(todo => {
+            const diff = this.#humanReadableDiff(todo);
+
+            const rawTask = todo.task.padEnd(25);
+            const rawID = String(todo.id).padEnd(4);
+            const rawStatus = (todo.completed ? "done" : "not finished").padEnd(14);
+            const rawIsDeleted = (todo.deleted ? "deleted" : "not deleted").padEnd(14);
+
+            const isDeleted = todo.deleted
+            ? customRed(rawIsDeleted)
+            : customGreen(rawIsDeleted);
+            const task = rawTask; // keep plain (optional color later)
+            const id = customYellow(rawID);
+            const status = todo.completed
+                ? customGreen(rawStatus)
+                : customRed(rawStatus);
+
+            const time = todo.completed
+                ? `done ${diff.completedMin} ${diff.CompletedIsSec ? "seconds" : "minutes"} ago`
+                : `created ${diff.createdMin} ${diff.createdIsSec ? "seconds" : "minutes"} ago`;
+
+            console.log(`${task} [${id}] [${status}] [${isDeleted}] [${time}]`);
+        });
+    }
 }
 
 const todo = new Todolist();

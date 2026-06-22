@@ -43,7 +43,11 @@ async function main() {
                 'show all todos',
                 {},
                 () => {
-                    todo.list()
+                    if (!debugMode) {
+                        todo.list()
+                    } else {
+                        todo.debugList(); 
+                    }
                 }
             )
             .command(
