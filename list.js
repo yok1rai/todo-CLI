@@ -1,21 +1,11 @@
+import getConfigPath, { jsonExists } from "./genFile.js";
 import fs from "fs";
 import path from "path";
-
-function jsonExists(filePath) {
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, JSON.stringify([]), "utf-8");
-        return [];
-    } else {
-        const data = fs.readFileSync(filePath, "utf-8");
-        return JSON.parse(data);
-    }
-}
-
 
 class Todolist {
     static #lastID;
     #todos;
-    constructor(filePath = "data.json") {
+    constructor(filePath = getConfigPath()) {
         if (!(filePath.endsWith(".json"))) {
             throw new Error("save file must be a JSON");
         }
@@ -64,7 +54,7 @@ class Todolist {
         const todoItem = this.#activeTodos.find((t) => t.task.toLowerCase() === task.toLowerCase());
         if (!todoItem) {
             console.error("todo not found");
-            return
+            return;
         }
         return todoItem.id;
     }
