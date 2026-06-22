@@ -1,6 +1,11 @@
 import getConfigPath, { jsonExists } from "./genFile.js";
 import fs from "fs";
 import path from "path";
+import "./overload.js";
+import {customGrey, customGreen, customRed, customWhite, customYellow} from "./overload.js"
+import chalk from "chalk";
+
+chalk.level = 3;
 
 class Todolist {
     static #lastID;
@@ -59,6 +64,14 @@ class Todolist {
         return todoItem.id;
     }
     add(task) {
+        if (!task) {
+            console.error("task name cannot be empty");
+            return
+        }
+        if (task.length > 25) {
+            console.error("task name is so long");
+            return;
+        }
         Todolist.#lastID += 1;
         const todo = {
             id: Todolist.#lastID,
@@ -112,16 +125,29 @@ class Todolist {
         const activeTodos = this.#activeTodos;
         if (activeTodos.length === 0) {
             console.error("no todos yet!");
-            return
+            return;
         }
+
         console.log("Your Todos:");
+
         activeTodos.forEach(todo => {
-            const status = todo.completed ? "done" : "not finished";
             const diff = this.#humanReadableDiff(todo);
+
+            const rawTask = todo.task.padEnd(25);
+            const rawID = String(todo.id).padEnd(4);
+            const rawStatus = (todo.completed ? "done" : "not finished").padEnd(14);
+
+            const task = rawTask; // keep plain (optional color later)
+            const id = customYellow(rawID);
+            const status = todo.completed
+                ? customGreen(rawStatus)
+                : customRed(rawStatus);
+
             const time = todo.completed
                 ? `done ${diff.completedMin} ${diff.CompletedIsSec ? "seconds" : "minutes"} ago`
                 : `created ${diff.createdMin} ${diff.createdIsSec ? "seconds" : "minutes"} ago`;
-            console.log(`${todo.task} [${todo.id}] [${status}] [${time}]`);
+
+            console.log(`${task} [${id}] [${status}] [${time}]`);
         });
     }
 }

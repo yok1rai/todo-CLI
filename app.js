@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
+import "./overload.js";
+import { customGrey, customGreen, customRed, customWhite } from "./overload.js"
 import todo from "./list.js";
 import { hideBin } from 'yargs/helpers';
 import yargs from "yargs";
 import readline from "readline";
-
+import chalk from "chalk";
 const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -12,7 +14,7 @@ const rl = readline.createInterface({
 
 function input(prompt) {
     return new Promise((res) => {
-        rl.question(prompt, (answer) => {
+        rl.question(customGrey(prompt), (answer) => {
             res(answer);
         })
     })
@@ -30,10 +32,6 @@ async function main() {
                     let name;
                     if (!argv.task) {
                         name = (await input("add: ")).trim();
-                        if (!name) {
-                            console.error("task name cannot be empty");
-                            return;
-                        }
                     } else {
                         name = argv.task;
                     }
