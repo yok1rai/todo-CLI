@@ -134,7 +134,8 @@ class Todolist {
             console.error("nothing to clear");
             return
         }
-        this.#todos.forEach(t => t.deleted = true);
+        const deletableTodos = activeTodos.filter(t => t.immutable == false);
+        deletableTodos.forEach(t => t.deleted = true);
         this.#saveTodos();
         console.log("all todos cleared");
     }

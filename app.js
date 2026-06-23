@@ -7,7 +7,7 @@ import { hideBin } from 'yargs/helpers';
 import yargs from "yargs";
 import readline from "readline";
 import chalk from "chalk";
-import {resolveTodoId} from "./utils.js"
+import { resolveTodoId } from "./utils.js"
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -76,7 +76,7 @@ async function interactive() {
                 todo.delete(id);
                 break;
             }
-            case 'clear':{
+            case 'clear': {
                 const confirm = (await input("are you sure? ")).trim().toLowerCase();
                 if (confirm !== 'y' && confirm !== 'yes') {
                     console.error("clear canceled");
@@ -96,12 +96,11 @@ Commands:
   delete            delete a todo
   clear             delete all todos
   exit              exit from the interactive mode
-
 `))
                 break;
             }
             case 'exit':
-                console.log("goodbye!"); 
+                console.log("goodbye!");
                 process.exit(0);
                 break;
             default:
