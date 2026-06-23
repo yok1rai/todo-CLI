@@ -66,13 +66,37 @@ async function interactive() {
                     console.error("id or name cannot be empty");
                     continue;
                 }
-                let id = resolveTodoId(name);
+                const id = resolveTodoId(name);
                 todo.done(id);
                 break;
             }
+            case 'mute': {
+                const name = (await input("Enter ID or name: ")).trim();
+
+                if (!name) {
+                    console.error("id or name cannot be empty");
+                }
+                const id = resolveTodoId(name);
+                todo.mute(id);
+                break;
+            }
+            case 'immute': {
+                const name = (await input("Enter ID or name: ")).trim();
+
+                if (!name) {
+                    console.error("id or name cannot be empty");
+                }
+                const id = resolveTodoId(name);
+                todo.immute(id);
+                break; 
+            }
             case 'delete': {
                 const name = (await input("Enter ID or name: ")).trim();
-                let id = resolveTodoId(name);
+                if (!name) {
+                    console.error("id or name cannot be empty");
+                    continue;
+                }
+                const id = resolveTodoId(name);
                 todo.delete(id);
                 break;
             }

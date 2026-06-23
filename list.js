@@ -110,6 +110,40 @@ class Todolist {
         this.#saveTodos();
         console.log(`${todo.task} marked as done! `);
     }
+    mute(id) {
+        if (id < 0) {
+            console.error("ID cannot be less than 0");
+            return;
+        }
+        const todo = this.#activeTodos.find(t => t.id == Number(id));
+        if (!todo) {
+            console.error("Todo not found or already deleted");
+        }
+        if (todo.immutable) {
+            console.log(`Todo "${todo.task}" is now mutable`);
+            todo.immutable = false;
+        } else {
+            console.error(`Todo "${todo.task}" is already mutable`);
+        }
+        this.#saveTodos();
+    }
+    immute(id) {
+        if (id < 0) {
+            console.error("ID cannot be less than 0");
+            return;
+        }
+        const todo = this.#activeTodos.find(t => t.id == Number(id));
+        if (!todo) {
+            console.error("Todo not found or already deleted");
+        }
+        if (!todo.immutable) {
+            console.log(`Todo "${todo.task}" is now immutable`);
+            todo.immutable = true;
+        } else {
+            console.error(`Todo "${todo.task}" is already immutable`);
+        }
+        this.#saveTodos();
+    }
     delete(id) {
         if (id < 0) {
             console.error("ID cannot be less than 0");
