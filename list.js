@@ -125,7 +125,7 @@ class Todolist {
             todo.immutable = false;
         } else {
             console.error(`Todo "${todo.task}" is already mutable`);
-            return; 
+            return;
         }
         this.#saveTodos();
     }
@@ -176,6 +176,15 @@ class Todolist {
         deletableTodos.forEach(t => t.deleted = true);
         this.#saveTodos();
         console.log("all todos cleared");
+    }
+    deepclear() {
+        if (this.#todos.length === 0) {
+            console.error("file is empty");
+            return;
+        }
+        this.#todos = [];
+        this.#saveTodos(); 
+        console.log("file is cleared");
     }
     list() {
         const activeTodos = this.#activeTodos;

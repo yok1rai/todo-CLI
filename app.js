@@ -109,9 +109,17 @@ async function interactive() {
                 todo.clear();
                 break;
             }
+            case 'deepclear': {
+                const confirm = (await input("are you sure? ")).trim().toLowerCase();
+                if (confirm !== 'y' && confirm !== 'yes') {
+                    console.error("deepclear canceled");
+                }
+                todo.deepclear();
+                break;
+            }
             case 'h':
             case 'help': {
-                console.log(customRed(`app.js <command>
+                console.log(customWhite(`app.js <command>
 
 Commands:
   add               add a new todo
@@ -120,6 +128,7 @@ Commands:
   mute              make todo mutable
   immute            make todo immutable
   delete            delete a todo
+  deepclear         hard-delete the todos
   clear             delete all todos
   exit              exit from the interactive mode
 `))
@@ -222,7 +231,7 @@ async function nonInteractive() {
                         return;
                     }
                 } else {
-                    name = argv.id; 
+                    name = argv.id;
                 }
                 let id = resolveTodoId(name);
                 todo.immute(id);
@@ -250,14 +259,25 @@ async function nonInteractive() {
         .command(
             'clear',
             'delete all todos',
-            {},
-            async () => {
+            (yargs) => {
+                return yargs.option('f', {
+                    alias: 'force',
+                    type: 'boolean',
+                    default: false,
+                    description: 'deep clean the task list'
+                });
+            },
+            async (argv) => {
                 const confirm = (await input("Are you sure? ")).trim().toLowerCase();
                 if (confirm !== 'y' && confirm !== 'yes') {
                     console.log("clear canceled");
                     return;
                 }
-                todo.clear()
+                if (!argv.f) {
+                    todo.clear();
+                } else {
+                    todo.deepclear();
+                }
             }
         )
         .demandCommand(1, 1, "You must provide a message")
