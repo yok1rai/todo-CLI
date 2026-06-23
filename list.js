@@ -58,12 +58,11 @@ class Todolist {
     find(task) {
         const todoItem = this.#activeTodos.find((t) => t.task.toLowerCase() === task.toLowerCase());
         if (!todoItem) {
-            console.error("todo not found");
             return;
         }
         return todoItem.id;
     }
-    add(task) {
+    add(task, immutable) {
         if (!task) {
             console.error("task name cannot be empty");
             return
@@ -79,11 +78,13 @@ class Todolist {
             completed: false,
             deleted: false,
             createdAt: new Date().toISOString(),
-            completedAt: null
+            completedAt: null,
+            immutable
         }
         this.#todos.push(todo);
         this.#saveTodos();
-        console.log("Added:", task);
+        const text = immutable ? `immutable "${task}" task is added` : `"${task}" is added`;
+        console.log(text);
     }
     done(id) {
         const todo = this.#activeTodos.find(t => t.id === Number(id));
@@ -103,10 +104,13 @@ class Todolist {
     delete(id) {
         const todo = this.#activeTodos.find(t => t.id === Number(id));
         if (!todo) {
-            console.error(`Todo #${id} not found or already deleted`);
-            return
+            console.error(`Todo not found or already deleted`);
+            return;
         }
-
+        if (todo.immutable) {
+            console.error(`Todo #${id} is immutable, you cannot delete it`);
+            return;
+        }
         todo.deleted = true;
         this.#saveTodos();
         console.log(`"${todo.task}" is deleted`);
@@ -180,7 +184,7 @@ class Todolist {
                 ? `done ${diff.completedMin} ${diff.CompletedIsSec ? "seconds" : "minutes"} ago`
                 : `created ${diff.createdMin} ${diff.createdIsSec ? "seconds" : "minutes"} ago`;
 
-            console.log(`${task} [${id}] [${status}] [${isDeleted}] [${time}]`);
+            console.log(`${task} [${id}] [${status}] [${isDeleted}] [${time}] ${todo.immutable ? "[i]" : ""}`);
         });
     }
 }

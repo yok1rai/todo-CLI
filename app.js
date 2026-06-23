@@ -26,9 +26,16 @@ async function main() {
     try {
         await yargs(hideBin(process.argv))
             .command(
-                'add [task]',
+                'add [task] [flags]',
                 "add a new todo",
-                {},
+                (yargs) => {
+                    return yargs.option('i', {
+                        alias: 'immutable',
+                        type: 'boolean',
+                        default: false,
+                        description: 'mark todo as immutable'
+                    });
+                },
                 async (argv) => {
                     let name;
                     if (!argv.task) {
@@ -36,7 +43,8 @@ async function main() {
                     } else {
                         name = argv.task;
                     }
-                    todo.add(name);
+
+                    todo.add(name, argv.i);
                 }
             )
             .command(
@@ -120,38 +128,15 @@ async function main() {
                     todo.clear()
                 }
             )
-        yargs(hideBin(process.argv))
-            .help(false)
-            .version(false)
-            .command('add [task]', 'add a new todo', {}, () => { })
-            .command('list', 'show all todos', {}, () => { })
-            .fail((msg, err, yargs) => {
-                console.log(customRed(msg));
-                console.log('\nCustom help:\n');
-
-                console.log(chalk.green('Commands:'));
-                console.log(`  ${chalk.yellow('add [task]')}   add a new todo`);
-                console.log(`  ${chalk.yellow('list')}         show all todos`);
-                console.log(`  ${chalk.yellow('done [id]')}    mark todo as done`);
-                console.log(`  ${chalk.yellow('delete [id]')}  delete a todo`);
-                console.log(`  ${chalk.yellow('clear')}        delete all todos`);
-
-                process.exit(1);
-            })
-            .completion('completion', 'Generate completion script', () => {
-                return ['add', 'list', 'done', 'delete', 'clear', 'help']
-            })
-            .demandCommand(1, "You must specify a command")
+            .demandCommand(1, 1, "You must provide a message")
             .strict()
             .help()
             .alias('h', 'help')
             .version()
             .alias('v', 'version')
             .parseAsync();
-            rl.close();
 
     } catch (e) {
-        rl.close();
         if (debugMode) {
             console.log("error [DETAILED]:");
             console.log(e);
@@ -159,6 +144,8 @@ async function main() {
             console.log("error:", e.message);
         }
         process.exit(1);
+    } finally {
+        rl.close();
     }
 }
 
