@@ -118,12 +118,14 @@ class Todolist {
         const todo = this.#activeTodos.find(t => t.id == Number(id));
         if (!todo) {
             console.error("Todo not found or already deleted");
+            return;
         }
         if (todo.immutable) {
             console.log(`Todo "${todo.task}" is now mutable`);
             todo.immutable = false;
         } else {
             console.error(`Todo "${todo.task}" is already mutable`);
+            return; 
         }
         this.#saveTodos();
     }
@@ -135,12 +137,14 @@ class Todolist {
         const todo = this.#activeTodos.find(t => t.id == Number(id));
         if (!todo) {
             console.error("Todo not found or already deleted");
+            return;
         }
         if (!todo.immutable) {
             console.log(`Todo "${todo.task}" is now immutable`);
             todo.immutable = true;
         } else {
             console.error(`Todo "${todo.task}" is already immutable`);
+            return;
         }
         this.#saveTodos();
     }
