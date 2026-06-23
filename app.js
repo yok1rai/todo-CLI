@@ -144,6 +144,7 @@ Commands:
   delete            delete a todo
   deepclear         hard-delete the todos
   clear             delete all todos
+  stat              get statics
   exit              exit from the interactive mode
 `))
                 break;
@@ -322,7 +323,7 @@ async function nonInteractive() {
             'get statics',
             {},
             async () => {
-                todo.stat(); 
+                todo.stat();
             }
         )
         .demandCommand(1, 1, "You must provide a message")
