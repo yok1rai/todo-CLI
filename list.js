@@ -63,6 +63,11 @@ class Todolist {
         return todoItem.id;
     }
     add(task, immutable) {
+        const activeTodos = this.#activeTodos;
+        if (activeTodos.some(t => t.task.toLowerCase() === task.toLowerCase())) {
+            console.error("task name must be unique");
+            return;
+        }
         if (!task) {
             console.error("task name cannot be empty");
             return
@@ -87,6 +92,10 @@ class Todolist {
         console.log(text);
     }
     done(id) {
+        if (id < 0) {
+            console.error("ID cannot be less than 0");
+            return;
+        }
         const todo = this.#activeTodos.find(t => t.id === Number(id));
         if (!todo) {
             console.error(`Todo #${id} not found`);
@@ -102,13 +111,17 @@ class Todolist {
         console.log(`${todo.task} marked as done! `);
     }
     delete(id) {
+        if (id < 0) {
+            console.error("ID cannot be less than 0");
+            return;
+        }
         const todo = this.#activeTodos.find(t => t.id === Number(id));
         if (!todo) {
             console.error(`Todo not found or already deleted`);
             return;
         }
         if (todo.immutable) {
-            console.error(`Todo #${id} is immutable, you cannot delete it`);
+            console.error(`Todo "${todo.task}" is immutable, you cannot delete it`);
             return;
         }
         todo.deleted = true;
@@ -151,7 +164,7 @@ class Todolist {
                 ? `done ${diff.completedMin} ${diff.CompletedIsSec ? "seconds" : "minutes"} ago`
                 : `created ${diff.createdMin} ${diff.createdIsSec ? "seconds" : "minutes"} ago`;
 
-            console.log(`${task} [${id}] [${status}] [${time}]`);
+            console.log(`${task} [${id}] [${status}] [${time}] ${todo.immutable ? "[i]" : ""}`);
         });
     }
     debugList() {
@@ -174,7 +187,7 @@ class Todolist {
             const isDeleted = todo.deleted
             ? customRed(rawIsDeleted)
             : customGreen(rawIsDeleted);
-            const task = rawTask; // keep plain (optional color later)
+            const task = rawTask;
             const id = customYellow(rawID);
             const status = todo.completed
                 ? customGreen(rawStatus)

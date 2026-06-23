@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers';
 import yargs from "yargs";
 import readline from "readline";
 import chalk from "chalk";
+import {resolveTodoId} from "./utils.js"
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -21,121 +22,197 @@ function input(prompt) {
     })
 }
 
-async function main() {
-    const debugMode = process.env.DEBUG === "1" ? true : false;
-    try {
-        await yargs(hideBin(process.argv))
-            .command(
-                'add [task] [flags]',
-                "add a new todo",
-                (yargs) => {
-                    return yargs.option('i', {
-                        alias: 'immutable',
-                        type: 'boolean',
-                        default: false,
-                        description: 'mark todo as immutable'
-                    });
-                },
-                async (argv) => {
-                    let name;
-                    if (!argv.task) {
-                        name = (await input("add: ")).trim();
-                    } else {
-                        name = argv.task;
-                    }
+const debugMode = process.env.DEBUG === "1" ? true : false;
 
-                    todo.add(name, argv.i);
+async function interactive() {
+    console.log("type `help` or `h` for commands");
+    while (true) {
+        const command = (await input("> ")).trim().toLowerCase();
+        switch (command) {
+            case 'add': {
+                const name = (await input("Enter the name: ")).trim();
+                if (!name) {
+                    console.error("name cannot be empty");
+                    continue;
                 }
-            )
-            .command(
-                'list',
-                'show all todos',
-                {},
-                () => {
-                    if (!debugMode) {
-                        todo.list()
-                    } else {
-                        todo.debugList();
-                    }
+                let immutableFlag;
+                switch ((await input("immutable? ")).trim().toLowerCase()) {
+                    case 'y':
+                    case 'yes':
+                        immutableFlag = true;
+                        break;
+                    case 'n':
+                    case 'no':
+                        immutableFlag = false;
+                        break;
+                    default:
+                        console.error("invalid entry");
+                        continue;
                 }
-            )
-            .command(
-                'done [id]',
-                'mark todo as done',
-                {},
-                async (argv) => {
-                    let name;
-                    if (!argv.id) {
-                        name = (await input("mark as done: ")).trim();
-                        if (!name) {
-                            console.error("no task given");
-                            return;
-                        }
-                    } else {
-                        name = argv.id;
-                    }
-                    let id;
-                    if (Number.isFinite(Number(name))) {
-                        id = Number(name);
-                        if (id < 0) {
-                            console.error("ID must be bigger than zero");
-                            return;
-                        }
-                    } else {
-                        id = todo.find(name);
-                    }
-                    todo.done(id);
+                todo.add(name, immutableFlag);
+                break;
+            }
+            case 'list': {
+                if (!debugMode) {
+                    todo.list();
+                } else {
+                    todo.debugList();
                 }
-            )
-            .command(
-                'delete [id]',
-                'delete a todo',
-                {},
-                async (argv) => {
-                    let name;
-                    if (!argv.id) {
-                        name = (await input("remove: ")).trim();
-                        if (!name) {
-                            console.error("no task given");
-                            return;
-                        }
-                    } else {
-                        name = argv.id;
-                    }
-                    let id;
-                    if (Number.isFinite(Number(name))) {
-                        id = Number(name);
-                        if (id < 0) {
-                            console.error("ID must be bigger than zero");
-                            return;
-                        }
-                    } else {
-                        id = todo.find(name);
-                    }
-                    todo.delete(id);
+                break;
+            }
+            case 'done': {
+                const name = (await input("Enter ID or name: ")).trim();
+                if (!name) {
+                    console.error("id or name cannot be empty");
+                    continue;
                 }
-            )
-            .command(
-                'clear',
-                'delete all todos',
-                {},
-                async () => {
-                    const confirm = (await input("Are you sure? ")).trim().toLowerCase();
-                    if (confirm !== 'y' && confirm !== 'yes') {
-                        console.log("clear canceled");
+                let id = resolveTodoId(name);
+                todo.done(id);
+                break;
+            }
+            case 'delete': {
+                const name = (await input("Enter ID or name: ")).trim();
+                let id = resolveTodoId(name);
+                todo.delete(id);
+                break;
+            }
+            case 'clear':{
+                const confirm = (await input("are you sure? ")).trim().toLowerCase();
+                if (confirm !== 'y' && confirm !== 'yes') {
+                    console.error("clear canceled");
+                    continue;
+                }
+                todo.clear();
+                break;
+            }
+            case 'h':
+            case 'help': {
+                console.log(customRed(`app.js <command>
+
+Commands:
+  add               add a new todo
+  list              show all todos
+  done              mark todo as done
+  delete            delete a todo
+  clear             delete all todos
+  exit              exit from the interactive mode
+
+`))
+                break;
+            }
+            case 'exit':
+                console.log("goodbye!"); 
+                process.exit(0);
+                break;
+            default:
+                console.error("invalid command, type `h` for options")
+        }
+    }
+}
+
+async function nonInteractive() {
+    await yargs(hideBin(process.argv))
+        .command(
+            'add [task] [flags]',
+            "add a new todo",
+            (yargs) => {
+                return yargs.option('i', {
+                    alias: 'immutable',
+                    type: 'boolean',
+                    default: false,
+                    description: 'mark todo as immutable'
+                });
+            },
+            async (argv) => {
+                let name;
+                if (!argv.task) {
+                    name = (await input("add: ")).trim();
+                } else {
+                    name = argv.task;
+                }
+
+                todo.add(name, argv.i);
+            }
+        )
+        .command(
+            'list',
+            'show all todos',
+            {},
+            () => {
+                if (!debugMode) {
+                    todo.list()
+                } else {
+                    todo.debugList();
+                }
+            }
+        )
+        .command(
+            'done [id]',
+            'mark todo as done',
+            {},
+            async (argv) => {
+                let name;
+                if (!argv.id) {
+                    name = (await input("mark as done: ")).trim();
+                    if (!name) {
+                        console.error("no task given");
                         return;
                     }
-                    todo.clear()
+                } else {
+                    name = argv.id;
                 }
-            )
-            .demandCommand(1, 1, "You must provide a message")
-            .strict()
-            .help()
-            .alias('h', 'help')
-            .version()
-            .alias('v', 'version')
-            .parseAsync();
+                let id = resolveTodoId(name);
+                todo.done(id);
+            }
+        )
+        .command(
+            'delete [id]',
+            'delete a todo',
+            {},
+            async (argv) => {
+                let name;
+                if (!argv.id) {
+                    name = (await input("remove: ")).trim();
+                    if (!name) {
+                        console.error("no task given");
+                        return;
+                    }
+                } else {
+                    name = argv.id;
+                }
+                let id = resolveTodoId(name);
+                todo.delete(id);
+            }
+        )
+        .command(
+            'clear',
+            'delete all todos',
+            {},
+            async () => {
+                const confirm = (await input("Are you sure? ")).trim().toLowerCase();
+                if (confirm !== 'y' && confirm !== 'yes') {
+                    console.log("clear canceled");
+                    return;
+                }
+                todo.clear()
+            }
+        )
+        .demandCommand(1, 1, "You must provide a message")
+        .strict()
+        .help()
+        .alias('h', 'help')
+        .version()
+        .alias('v', 'version')
+        .parseAsync();
+}
 
+async function main() {
+    try {
+        if (process.argv[2]) {
+            await nonInteractive();
+        } else {
+            await interactive();
+        }
     } catch (e) {
         if (debugMode) {
             console.log("error [DETAILED]:");
@@ -149,4 +226,4 @@ async function main() {
     }
 }
 
-main();
+main()
