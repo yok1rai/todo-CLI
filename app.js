@@ -1,13 +1,12 @@
 #!/usr/bin/env node
 
-import "./overload.js";
-import { customGrey, customGreen, customRed, customWhite } from "./overload.js"
-import todo from "./list.js";
-import { hideBin } from 'yargs/helpers';
-import yargs from "yargs";
 import readline from "readline";
-import chalk from "chalk";
-import { resolveTodoId } from "./utils.js"
+import yargs from "yargs";
+import { hideBin } from 'yargs/helpers';
+import todo from "./list.js";
+import "./overload.js";
+import { customGrey, customWhite } from "./overload.js";
+import { parseCommand, resolveTodoId } from "./utils.js";
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -27,27 +26,37 @@ const debugMode = process.env.DEBUG === "1" ? true : false;
 async function interactive() {
     console.log("type `help` or `h` for commands");
     while (true) {
-        const command = (await input("> ")).trim().toLowerCase();
-        switch (command) {
+        const commandInput = (await input("> ")).trim().toLowerCase();
+        const command = parseCommand(commandInput);
+        switch (command[0]) {
             case 'add': {
-                const name = (await input("Enter the name: ")).trim();
-                if (!name) {
-                    console.error("name cannot be empty");
-                    continue;
-                }
+                let name = command[1];
                 let immutableFlag;
-                switch ((await input("immutable? ")).trim().toLowerCase()) {
-                    case 'y':
-                    case 'yes':
-                        immutableFlag = true;
-                        break;
-                    case 'n':
-                    case 'no':
-                        immutableFlag = false;
-                        break;
-                    default:
-                        console.error("invalid entry");
+                if (!command[1]) {
+                    name = (await input("name: ")).trim();
+                    if (!name) {
+                        console.error("name cannot be empty");
                         continue;
+                    }
+                    switch ((await input("immutable? ")).trim().toLowerCase()) {
+                        case 'y':
+                        case 'yes':
+                            immutableFlag = true;
+                            break;
+                        case 'n':
+                        case 'no':
+                            immutableFlag = false;
+                            break;
+                        default:
+                            console.error("invalid entry");
+                            continue;
+                    }
+                } else {
+                    if (command[2] === '-i') {
+                        immutableFlag = true;
+                    } else {
+                        immutableFlag = false;
+                    }
                 }
                 todo.add(name, immutableFlag);
                 break;
@@ -61,52 +70,68 @@ async function interactive() {
                 break;
             }
             case 'done': {
-                const name = (await input("Enter ID or name: ")).trim();
-                if (!name) {
-                    console.error("id or name cannot be empty");
-                    continue;
+                let name = command[1];
+                if (!command[1]) {
+                    name = (await input("Enter ID or name: ")).trim();
+                    if (!name) {
+                        console.error("id or name cannot be empty");
+                        continue;
+                    }
+
+                } else {
+                    name = command[1];
                 }
                 const id = resolveTodoId(name, false);
                 todo.done(id);
                 break;
             }
             case 'mute': {
-                const name = (await input("Enter ID or name: ")).trim();
-
-                if (!name) {
-                    console.error("id or name cannot be empty");
-                    continue;
+                let name = command[1];
+                if (!command[1]) {
+                    name = (await input("Enter ID or name: ")).trim();
+                    if (!name) {
+                        console.error("id or name cannot be empty");
+                        continue;
+                    }
                 }
                 const id = resolveTodoId(name, false);
                 todo.mute(id);
                 break;
             }
             case 'immute': {
-                const name = (await input("Enter ID or name: ")).trim();
-
-                if (!name) {
-                    console.error("id or name cannot be empty");
-                    continue;
+                let name = command[1];
+                if (!command[1]) {
+                    name = (await input("Enter ID or name: ")).trim();
+                    if (!name) {
+                        console.error("id or name cannot be empty");
+                        continue;
+                    }
                 }
                 const id = resolveTodoId(name, false);
                 todo.immute(id);
                 break;
             }
             case 'recover': {
-                const name = (await input("Enter ID or name: ")).trim();
-                if (!name) {
-                    console.error("id or name cannot be empty");
-                    continue;
+                let name = command[1];
+                if (!command[1]) {
+                    name = (await input("Enter ID or name: ")).trim();
+                    if (!name) {
+                        console.error("id or name cannot be empty");
+                        continue;
+                    }
                 }
                 const id = resolveTodoId(name, true);
                 todo.recover(id);
                 break;
             }
             case 'delete': {
-                const name = (await input("Enter ID or name: ")).trim();
-                if (!name) {
-                    console.error("id or name cannot be empty");
-                    continue;
+                let name = command[1];
+                if (!command[1]) {
+                    name = (await input("Enter ID or name: ")).trim();
+                    if (!name) {
+                        console.error("id or name cannot be empty");
+                        continue;
+                    }
                 }
                 const id = resolveTodoId(name, false);
                 todo.delete(id);
@@ -144,7 +169,6 @@ Commands:
   delete            delete a todo
   deepclear         hard-delete the todos
   clear             delete all todos
-  stat              get statics
   exit              exit from the interactive mode
 `))
                 break;
