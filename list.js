@@ -239,6 +239,35 @@ class Todolist {
             console.log(`${task} [${id}] [${status}] [${time}] ${todo.immutable ? "[i]" : ""}`);
         });
     }
+    listDeleted() {
+        const deleted = this.#deletedTodos;
+        if (deleted.length === 0) {
+            console.error("no todos yet!");
+            return;
+        }
+
+        console.log("Deleted Todos:");
+
+        deleted.forEach(todo => {
+            const diff = this.#humanReadableDiff(todo);
+
+            const rawTask = todo.task.padEnd(25);
+            const rawID = String(todo.id).padEnd(4);
+            const rawStatus = (todo.completed ? "done" : "not finished").padEnd(14);
+
+            const task = rawTask;
+            const id = customYellow(rawID);
+            const status = todo.completed
+                ? customGreen(rawStatus)
+                : customRed(rawStatus);
+
+            const time = todo.completed
+                ? `done ${diff.completedMin} ${diff.CompletedIsSec ? "seconds" : "minutes"} ago`
+                : `created ${diff.createdMin} ${diff.createdIsSec ? "seconds" : "minutes"} ago`;
+
+            console.log(`${task} [${id}] [${status}] [${time}] ${todo.immutable ? "[i]" : ""}`);
+        });
+    }
     debugList() {
         const todos = this.#todos;
         if (todos.length === 0) {

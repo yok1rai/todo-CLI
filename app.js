@@ -31,7 +31,7 @@ async function interactive() {
         switch (command[0]) {
             case 'add': {
                 let name = command[1];
-                let immutableFlag;
+                let immutableFlag = command.slice(2).includes('-i');
                 if (!command[1]) {
                     name = (await input("name: ")).trim();
                     if (!name) {
@@ -51,17 +51,16 @@ async function interactive() {
                             console.error("invalid entry");
                             continue;
                     }
-                } else {
-                    if (command[2] === '-i') {
-                        immutableFlag = true;
-                    } else {
-                        immutableFlag = false;
-                    }
                 }
                 todo.add(name, immutableFlag);
                 break;
             }
             case 'list': {
+                const deletedList = command.slice(1).includes("-d");
+                if (deletedList) {
+                    todo.listDeleted();
+                    break;
+                }
                 if (!debugMode) {
                     todo.list();
                 } else {
@@ -212,14 +211,25 @@ async function nonInteractive() {
             }
         )
         .command(
-            'list',
+            'list [flags]',
             'show all todos',
-            {},
-            () => {
-                if (!debugMode) {
-                    todo.list()
+            (yargs) => {
+                return yargs.option('d', {
+                    alias: 'deleted',
+                    type: 'boolean',
+                    default: false,
+                    description: 'list deleted tasks instead'
+                });
+            },
+            (argv) => {
+                if (argv.d) {
+                    todo.listDeleted();
                 } else {
-                    todo.debugList();
+                    if (!debugMode) {
+                        todo.list()
+                    } else {
+                        todo.debugList();
+                    }
                 }
             }
         )
