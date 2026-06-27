@@ -3,7 +3,7 @@
 import readline from "readline";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import Storage from "#cli/storage.js";
+import Storage from "#core/storage.js";
 import Todolist from "#core/list.js";
 import "#core/overload.js";
 import { customGrey, customWhite } from "#core/overload.js";

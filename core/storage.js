@@ -1,5 +1,4 @@
-// cli/storage.js
-import getConfigPath, { jsonExists } from "#cli/genFile.js";
+import getConfigPath, { jsonExists } from "#core/genFile.js";
 import fs from "fs";
 import path from "path";
 

@@ -34,11 +34,17 @@ class Todolist {
             throw new Error(`Error saving todos: ${e.message}`);
         }
     }
+
     get #activeTodos() {
         return this.#todos.filter(t => !t.deleted);
     }
+
     get #deletedTodos() {
         return this.#todos.filter(t => t.deleted);
+    }
+
+    getAll() {
+        return this.#todos;
     }
     #humanReadableDiff(todo) {
         const createdTime = new Date(todo.createdAt).getTime();
