@@ -1,10 +1,10 @@
-import todo from "#core/list.js"
-
-export function resolveTodoId(input, deleted = false) {
+export function resolveTodoId(input, deleted = false, todoInstance) {
     if (Number.isFinite(Number(input))) {
         return Number(input);
     }
-    return deleted ? todo.deletedFind(input) : todo.find(input);
+    return deleted
+        ? todoInstance.deletedFind(input)
+        : todoInstance.find(input);
 }
 
 export function parseCommand(input) {

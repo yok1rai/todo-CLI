@@ -2,8 +2,9 @@
 
 import readline from "readline";
 import yargs from "yargs";
-import { hideBin } from 'yargs/helpers';
-import todo from "#core/list.js";
+import { hideBin } from "yargs/helpers";
+import Storage from "#cli/storage.js";
+import Todolist from "#core/list.js";
 import "#core/overload.js";
 import { customGrey, customWhite } from "#core/overload.js";
 import { parseCommand, resolveTodoId } from "#core/utils.js";
@@ -12,6 +13,9 @@ const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
+
+const storage = new Storage();
+const todo = new Todolist(storage);
 
 function input(prompt) {
     return new Promise((res) => {
@@ -80,7 +84,7 @@ async function interactive() {
                 } else {
                     name = command[1];
                 }
-                const id = resolveTodoId(name, false);
+                const id = resolveTodoId(name, false, todo);
                 todo.done(id);
                 break;
             }
@@ -93,7 +97,7 @@ async function interactive() {
                         continue;
                     }
                 }
-                const id = resolveTodoId(name, false);
+                const id = resolveTodoId(name, false, todo);
                 todo.mute(id);
                 break;
             }
@@ -106,7 +110,7 @@ async function interactive() {
                         continue;
                     }
                 }
-                const id = resolveTodoId(name, false);
+                const id = resolveTodoId(name, false, todo);
                 todo.immute(id);
                 break;
             }
@@ -119,7 +123,7 @@ async function interactive() {
                         continue;
                     }
                 }
-                const id = resolveTodoId(name, true);
+                const id = resolveTodoId(name, true, todo);
                 todo.recover(id);
                 break;
             }
@@ -132,7 +136,7 @@ async function interactive() {
                         continue;
                     }
                 }
-                const id = resolveTodoId(name, false);
+                const id = resolveTodoId(name, false, todo);
                 todo.delete(id);
                 break;
             }
@@ -248,7 +252,7 @@ async function nonInteractive() {
                 } else {
                     name = argv.id;
                 }
-                let id = resolveTodoId(name, false);
+                let id = resolveTodoId(name, false, todo);
                 todo.done(id);
             }
         )
@@ -267,7 +271,7 @@ async function nonInteractive() {
                 } else {
                     name = argv.id;
                 }
-                let id = resolveTodoId(name, false);
+                let id = resolveTodoId(name, false, todo);
                 todo.mute(id);
             }
         )
@@ -286,7 +290,7 @@ async function nonInteractive() {
                 } else {
                     name = argv.id;
                 }
-                let id = resolveTodoId(name, false);
+                let id = resolveTodoId(name, false, todo);
                 todo.immute(id);
             }
         )
@@ -305,7 +309,7 @@ async function nonInteractive() {
                 } else {
                     name = argv.id;
                 }
-                let id = resolveTodoId(name, false);
+                let id = resolveTodoId(name, false, todo);
                 todo.recover(id);
             }
         )
@@ -324,7 +328,7 @@ async function nonInteractive() {
                 } else {
                     name = argv.id;
                 }
-                let id = resolveTodoId(name, false);
+                let id = resolveTodoId(name, false, todo);
                 todo.delete(id);
             }
         )

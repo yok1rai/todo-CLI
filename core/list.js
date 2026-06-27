@@ -1,26 +1,26 @@
-import getConfigPath, { jsonExists } from "#cli/genFile.js";
-import fs from "fs";
-import path from "path";
 import "#core/overload.js";
 import { customGrey, customGreen, customRed, customWhite, customYellow } from "./overload.js"
-import chalk from "chalk";
-
-chalk.level = 3;
 
 class Todolist {
     static #lastID;
     #todos;
-    constructor(filePath = getConfigPath()) {
-        if (!(filePath.endsWith(".json"))) {
-            throw new Error("save file must be a JSON");
+    #storage;
+
+    constructor(storage) {
+        if (!storage || typeof storage.load !== "function" || typeof storage.save !== "function") {
+            throw new Error("Invalid storage: must have load() and save()");
         }
-        this.filePath = filePath;
+
+        this.#storage = storage;
+
         this.#todos = this.#loadTodos();
-        Todolist.#lastID = this.#todos.length ? Math.max(...this.#todos.map(t => t.id)) : 0;
+        Todolist.#lastID = this.#todos.length
+            ? Math.max(...this.#todos.map(t => t.id))
+            : 0;
     }
     #loadTodos() {
         try {
-            return jsonExists(this.filePath);
+            return this.#storage.load() || [];
         } catch (e) {
             console.error(`error: file cannot be created (probably due to permission issues)`);
             console.error(`detailed info: ${e.message}`);
@@ -29,11 +29,7 @@ class Todolist {
     }
     #saveTodos() {
         try {
-            const dir = path.dirname(this.filePath);
-            if (dir && !fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-            }
-            fs.writeFileSync(this.filePath, JSON.stringify(this.#todos, null, 2), "utf-8");
+            this.#storage.save(this.#todos);
         } catch (e) {
             throw new Error(`Error saving todos: ${e.message}`);
         }
@@ -351,5 +347,5 @@ Longest task: ${longestTime ? longestTime.task : "none"} [${diffText}]
     }
 }
 
-const todo = new Todolist();
-export default todo;
+export default Todolist;
+
