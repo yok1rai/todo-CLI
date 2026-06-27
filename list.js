@@ -2,7 +2,7 @@ import getConfigPath, { jsonExists } from "./genFile.js";
 import fs from "fs";
 import path from "path";
 import "./overload.js";
-import {customGrey, customGreen, customRed, customWhite, customYellow} from "./overload.js"
+import { customGrey, customGreen, customRed, customWhite, customYellow } from "./overload.js"
 import chalk from "chalk";
 
 chalk.level = 3;
@@ -48,7 +48,7 @@ class Todolist {
         const createdTime = new Date(todo.createdAt).getTime();
         const createdDiff = Date.now() - createdTime;
 
-        const createdMin =  createdDiff < 60000 ? Math.floor(createdDiff / 1000) : Math.floor(createdDiff / 60000);
+        const createdMin = createdDiff < 60000 ? Math.floor(createdDiff / 1000) : Math.floor(createdDiff / 60000);
         const createdIsSec = createdDiff < 60000;
 
         const completedTime = new Date(todo.completedAt).getTime();
@@ -98,7 +98,7 @@ class Todolist {
         }
         this.#todos.push(todo);
         this.#saveTodos();
-        const text = immutable ? `immutable "${task}" task is added` : `"${task}" is added`;
+        const text = immutable ? `immutable \`${task}\` task is added` : `\`${task}\` is added`;
         console.log(text);
     }
     done(id) {
@@ -131,10 +131,10 @@ class Todolist {
             return;
         }
         if (todo.immutable) {
-            console.log(`Todo "${todo.task}" is now mutable`);
+            console.log(`Todo \`${todo.task}\` is now mutable`);
             todo.immutable = false;
         } else {
-            console.error(`Todo "${todo.task}" is already mutable`);
+            console.error(`Todo \`${todo.task}\` is already mutable`);
             return;
         }
         this.#saveTodos();
@@ -150,10 +150,10 @@ class Todolist {
             return;
         }
         if (!todo.immutable) {
-            console.log(`Todo "${todo.task}" is now immutable`);
+            console.log(`Todo \`${todo.task}\` is now immutable`);
             todo.immutable = true;
         } else {
-            console.error(`Todo "${todo.task}" is already immutable`);
+            console.error(`Todo \`${todo.task}\` is already immutable`);
             return;
         }
         this.#saveTodos();
@@ -183,12 +183,12 @@ class Todolist {
             return;
         }
         if (todo.immutable) {
-            console.error(`Todo "${todo.task}" is immutable, you cannot delete it`);
+            console.error(`Todo \`${todo.task}\` is immutable, you cannot delete it`);
             return;
         }
         todo.deleted = true;
         this.#saveTodos();
-        console.log(`"${todo.task}" is deleted`);
+        console.log(`\`${todo.task}\` is deleted`);
     }
     clear() {
         const activeTodos = this.#activeTodos;
@@ -286,8 +286,8 @@ class Todolist {
             const rawIsDeleted = (todo.deleted ? "deleted" : "not deleted").padEnd(14);
 
             const isDeleted = todo.deleted
-            ? customRed(rawIsDeleted)
-            : customGreen(rawIsDeleted);
+                ? customRed(rawIsDeleted)
+                : customGreen(rawIsDeleted);
             const task = rawTask;
             const id = customYellow(rawID);
             const status = todo.completed
@@ -341,6 +341,6 @@ Longest task: ${longestTime ? longestTime.task : "none"} [${diffText}]
 `);
     }
 }
-1
+
 const todo = new Todolist();
 export default todo;

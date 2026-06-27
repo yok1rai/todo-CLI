@@ -11,13 +11,35 @@ export function parseCommand(input) {
     const result = [];
     let current = "";
     let inQuotes = false;
+    let escapeNext = false;
 
-    for (let i = 0; i < input.length; i++) {
-        const char = input[i];
+    for (const char of input) {
+
+        if (escapeNext) {
+            switch (char) {
+                case '"':
+                    current += '"';
+                    break;
+                case "\\":
+                    current += "\\";
+                    break;
+                default:
+                    current += char;
+            }
+            escapeNext = false;
+            continue;
+        }
+
+        if (char === "\\") {
+            escapeNext = true;
+            continue;
+        }
+
         if (char === '"') {
             inQuotes = !inQuotes;
             continue;
         }
+
         if (char === " " && !inQuotes) {
             if (current !== "") {
                 result.push(current);
@@ -27,8 +49,10 @@ export function parseCommand(input) {
             current += char;
         }
     }
+
     if (current !== "") {
         result.push(current);
     }
+
     return result;
 }
